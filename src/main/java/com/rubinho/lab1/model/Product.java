@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,30 +34,43 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @NotBlank
     @Column(nullable = false)
     private String name;
-    @ManyToOne(cascade = CascadeType.ALL)
+
+    @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(nullable = false)
     private Coordinates coordinates;
+
     @CreationTimestamp
     @Column(nullable = false)
     private LocalDate creationDate;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UnitOfMeasure unitOfMeasure;
+
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Organization manufacturer;
+
     @Min(1)
     @Column
     private int price;
+
     @Column
     private long manufactureCost;
+
     @Column(nullable = false)
     @DecimalMin(value = "0.0", inclusive = false)
     private Double rating;
+
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Person owner;
+
+    @JoinColumn
+    @ManyToOne
+    private User user;
 }

@@ -23,12 +23,16 @@ public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private Integer x;
+
     @Column(nullable = false)
     private Float y;
+
     @Column
     private int z;
+
     @Column
     @Size(max = 847, message = "{validation.name.size.too_long}")
     private String name;

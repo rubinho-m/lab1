@@ -1,6 +1,11 @@
 package com.rubinho.lab1.rest;
 
 import com.rubinho.lab1.dto.ProductDto;
+import com.rubinho.lab1.model.Coordinates;
+import com.rubinho.lab1.model.Organization;
+import com.rubinho.lab1.model.Person;
+import com.rubinho.lab1.model.UnitOfMeasure;
+import com.rubinho.lab1.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +30,20 @@ public interface ProductApi {
 
     @GetMapping("/products")
     ResponseEntity<List<ProductDto>> getAllProducts(@RequestParam(defaultValue = "0") @Min(0) int page,
-                                                    @RequestParam(defaultValue = "5") @Min(0) int limit);
+                                                    @RequestParam(defaultValue = "5") @Min(0) int limit,
+                                                    @RequestParam(value = "id", required = false) Long id,
+                                                    @RequestParam(value = "name", required = false) String name,
+                                                    @RequestParam(value = "coordinates", required = false) Coordinates coordinates,
+                                                    @RequestParam(value = "createdAt", required = false) Long creationDateTimestampMs,
+                                                    @RequestParam(value = "unitOfMeasure", required = false) UnitOfMeasure unitOfMeasure,
+                                                    @RequestParam(value = "manufacturer", required = false) Organization manufacturer,
+                                                    @RequestParam(value = "price", required = false) Integer price,
+                                                    @RequestParam(value = "manufactureCost", required = false) Long manufactureCost,
+                                                    @RequestParam(value = "rating", required = false) Double rating,
+                                                    @RequestParam(value = "owner", required = false) Person owner,
+                                                    @RequestParam(value = "user", required = false) User user,
+                                                    @RequestParam(defaultValue = "id") String sortBy,
+                                                    @RequestParam(defaultValue = "true") boolean ascending);
 
     @PutMapping(value = "/products", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
     ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto, @RequestHeader(name = "Authorization") String token);
@@ -42,14 +60,20 @@ public interface ProductApi {
     @GetMapping("/products/{substring}")
     ResponseEntity<List<ProductDto>> getAllProductsBySubstring(@RequestParam(defaultValue = "0") @Min(0) int page,
                                                                @RequestParam(defaultValue = "5") @Min(0) int limit,
-                                                               @PathVariable("substring") String substring,
-                                                               @RequestHeader(name = "Authorization") String token);
-
-    @GetMapping("/products/manufacturer/{id}")
-    ResponseEntity<List<ProductDto>> getAllProductsByManufacturer(@RequestParam(defaultValue = "0") @Min(0) int page,
-                                                                  @RequestParam(defaultValue = "5") @Min(0) int limit,
-                                                                  @PathVariable("id") Long id,
-                                                                  @RequestHeader(name = "Authorization") String token);
+                                                               @RequestParam(value = "id", required = false) Long id,
+                                                               @RequestParam(value = "name", required = false) String name,
+                                                               @RequestParam(value = "coordinates", required = false) Coordinates coordinates,
+                                                               @RequestParam(value = "createdAt", required = false) Long creationDateTimestampMs,
+                                                               @RequestParam(value = "unitOfMeasure", required = false) UnitOfMeasure unitOfMeasure,
+                                                               @RequestParam(value = "manufacturer", required = false) Organization manufacturer,
+                                                               @RequestParam(value = "price", required = false) Integer price,
+                                                               @RequestParam(value = "manufactureCost", required = false) Long manufactureCost,
+                                                               @RequestParam(value = "rating", required = false) Double rating,
+                                                               @RequestParam(value = "owner", required = false) Person owner,
+                                                               @RequestParam(value = "user", required = false) User user,
+                                                               @RequestParam(defaultValue = "id") String sortBy,
+                                                               @RequestParam(defaultValue = "true") boolean ascending,
+                                                               @PathVariable("substring") String substring);
 
     @PutMapping("/products/price:decrease/{percent}")
     ResponseEntity<Void> decreasePriceOnPercent(@PathVariable("percent") @Min(0) @Max(100) Integer percent,

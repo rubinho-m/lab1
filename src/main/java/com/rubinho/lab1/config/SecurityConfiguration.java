@@ -45,11 +45,11 @@ public class SecurityConfiguration {
                 .exceptionHandling(exception -> exception.accessDeniedHandler(accessDeniedHandler()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/admin").hasRole("ADMIN")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/register").permitAll()
-                        .requestMatchers("/login").permitAll()
-                        .anyRequest().authenticated()
+//                        .requestMatchers("/admin").hasRole("ADMIN")
+//                        .requestMatchers("/admin/**").hasRole("ADMIN")
+//                        .requestMatchers("/register").permitAll()
+//                        .requestMatchers("/login").permitAll()
+                        .anyRequest().permitAll()
                 );
 
         return http.build();

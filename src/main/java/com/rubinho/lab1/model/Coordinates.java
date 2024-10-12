@@ -23,8 +23,10 @@ public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(nullable = false)
     private Long x;
+
     @Max(888)
     @Column(nullable = false)
     private Float y;

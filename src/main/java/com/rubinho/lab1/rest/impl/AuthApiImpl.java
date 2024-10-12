@@ -1,7 +1,7 @@
 package com.rubinho.lab1.rest.impl;
 
 import com.rubinho.lab1.dto.AuthDto;
-import com.rubinho.lab1.dto.UserDto;
+import com.rubinho.lab1.dto.SignUpDto;
 import com.rubinho.lab1.model.RegistrationInfo;
 import com.rubinho.lab1.rest.AuthApi;
 import com.rubinho.lab1.services.UserService;
@@ -22,8 +22,8 @@ public class AuthApiImpl implements AuthApi {
     }
 
     @Override
-    public ResponseEntity<String> register(UserDto userDto) {
-        final RegistrationInfo info = userService.register(userDto);
+    public ResponseEntity<String> register(SignUpDto signUpDto) {
+        final RegistrationInfo info = userService.register(signUpDto);
         final HttpStatus httpStatus = info.success() ? HttpStatus.CREATED : HttpStatus.ACCEPTED;
         return ResponseEntity.status(httpStatus).body(info.token());
     }

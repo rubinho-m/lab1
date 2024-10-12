@@ -1,6 +1,5 @@
 package com.rubinho.lab1.repository;
 
-import com.rubinho.lab1.model.Person;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
 import org.springframework.data.domain.Page;
@@ -16,8 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByRole(Role role);
 
     Optional<User> findByLogin(String login);
-
-    Optional<User> findByPerson(Person person);
 
     Page<User> findAllByRole(Role role, Pageable pageable);
 }

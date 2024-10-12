@@ -1,9 +1,9 @@
 package com.rubinho.lab1.services.impl;
 
 import com.rubinho.lab1.dto.AuthDto;
-import com.rubinho.lab1.dto.UserDto;
+import com.rubinho.lab1.dto.SignUpDto;
 import com.rubinho.lab1.jwt.UserAuthProvider;
-import com.rubinho.lab1.mappers.AuthMapper;
+import com.rubinho.lab1.mappers.UserMapper;
 import com.rubinho.lab1.model.RegistrationInfo;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
@@ -21,22 +21,22 @@ import java.security.NoSuchAlgorithmException;
 public class UserServiceImpl implements UserService {
     private final UserAuthProvider userAuthProvider;
     private final UserRepository userRepository;
-    private final AuthMapper authMapper;
+    private final UserMapper userMapper;
 
     @Autowired
     public UserServiceImpl(UserAuthProvider userAuthProvider,
                            UserRepository userRepository,
-                           AuthMapper authMapper) {
+                           UserMapper userMapper) {
         this.userAuthProvider = userAuthProvider;
         this.userRepository = userRepository;
-        this.authMapper = authMapper;
+        this.userMapper = userMapper;
     }
 
     @Override
-    public RegistrationInfo register(UserDto userDto) {
-        final User user = authMapper.toEntity(userDto);
+    public RegistrationInfo register(SignUpDto signUpDto) {
+        final User user = userMapper.toEntity(signUpDto);
         boolean success = true;
-        user.setPassword(encodePassword(userDto.getPassword()));
+        user.setPassword(encodePassword(signUpDto.getPassword()));
         if (user.getRole().equals(Role.ADMIN)) {
             if (userRepository.existsByRole(Role.ADMIN)) {
                 user.setRole(Role.POTENTIAL_ADMIN);

@@ -1,19 +1,24 @@
 package com.rubinho.lab1.repository;
 
-import com.rubinho.lab1.model.Person;
 import com.rubinho.lab1.model.Product;
+import com.rubinho.lab1.model.User;
+import jakarta.annotation.Nonnull;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-    Optional<Product> findByOwnerAndRating(Person owner, Double rating);
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+    Optional<Product> findByUserAndRating(User user, Double rating);
 
-    List<Product> findAllByOwner(Person owner, Pageable pageable);
+    List<Product> findAllByUser(User user);
 
-    List<Product> findAllByOwner(Person owner);
+    @Nonnull
+    Page<Product> findAll(Specification<Product> spec, @Nonnull Pageable pageable);
 }

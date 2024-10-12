@@ -1,20 +1,26 @@
 package com.rubinho.lab1.rest.impl;
 
 import com.rubinho.lab1.dto.ProductDto;
-import com.rubinho.lab1.mappers.OrganizationMapper;
+import com.rubinho.lab1.model.Coordinates;
 import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Person;
+import com.rubinho.lab1.model.UnitOfMeasure;
+import com.rubinho.lab1.model.User;
+import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.rest.ProductApi;
-import com.rubinho.lab1.services.OrganizationService;
-import com.rubinho.lab1.services.UserService;
 import com.rubinho.lab1.services.ProductService;
+import com.rubinho.lab1.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
@@ -22,24 +28,17 @@ import java.util.List;
 public class ProductApiImpl implements ProductApi {
     private final ProductService productService;
     private final UserService userService;
-    private final OrganizationService organizationService;
-    private final OrganizationMapper organizationMapper;
 
     @Autowired
-    public ProductApiImpl(ProductService productService,
-                          UserService userService,
-                          OrganizationService organizationService,
-                          OrganizationMapper organizationMapper) {
+    public ProductApiImpl(ProductService productService, UserService userService) {
         this.productService = productService;
         this.userService = userService;
-        this.organizationService = organizationService;
-        this.organizationMapper = organizationMapper;
     }
 
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto, String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, owner));
+        final User user = userService.getUserByToken(getToken(token));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, user));
     }
 
     @Override
@@ -48,57 +47,120 @@ public class ProductApiImpl implements ProductApi {
     }
 
     @Override
-    public ResponseEntity<List<ProductDto>> getAllProducts(int page, int limit) {
-        return ResponseEntity.ok(productService.getAllProducts(PageRequest.of(page, limit)));
+    public ResponseEntity<List<ProductDto>> getAllProducts(int page,
+                                                           int limit,
+                                                           Long id,
+                                                           String name,
+                                                           Coordinates coordinates,
+                                                           Long creationDateTimestampMs,
+                                                           UnitOfMeasure unitOfMeasure,
+                                                           Organization manufacturer,
+                                                           Integer price,
+                                                           Long manufactureCost,
+                                                           Double rating,
+                                                           Person owner,
+                                                           User user,
+                                                           String sortBy,
+                                                           boolean ascending) {
+        final ProductFilter productFilter = new ProductFilter(
+                id,
+                name,
+                convertUnixTimestampToLocalDate(creationDateTimestampMs),
+                coordinates,
+                unitOfMeasure,
+                manufacturer,
+                price,
+                manufactureCost,
+                rating,
+                owner,
+                user
+        );
+        final Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        return ResponseEntity.ok(productService.getAllProducts(PageRequest.of(page, limit, sort), productFilter));
     }
 
     @Override
     public ResponseEntity<ProductDto> updateProduct(ProductDto productDto, String token) {
-        productService.checkOwner(productDto.getId(), userService.getUserByToken(getToken(token)));
-        return ResponseEntity.accepted().body(productService.updateProduct(productDto));
+        final User user = userService.getUserByToken(getToken(token));
+        productService.checkUser(productDto.getId(), user);
+        return ResponseEntity.ok(productService.updateProduct(productDto));
     }
 
     @Override
     public ResponseEntity<Void> deleteProduct(Long id, String token) {
-        productService.checkOwner(id, userService.getUserByToken(getToken(token)));
+        final User user = userService.getUserByToken(getToken(token));
+        productService.checkUser(id, user);
         productService.deleteProductById(id);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Void> removeByRating(Double rating, String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        productService.removeByRating(rating, owner);
+        final User user = userService.getUserByToken(getToken(token));
+        productService.removeByRating(rating, user);
         return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<Double> sumRating(String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        return ResponseEntity.ok(productService.getSumRating(owner));
+        final User user = userService.getUserByToken(getToken(token));
+        return ResponseEntity.ok(productService.getSumRating(user));
     }
 
     @Override
-    public ResponseEntity<List<ProductDto>> getAllProductsBySubstring(int page, int limit, String substring, String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        return ResponseEntity.ok(productService.getAllProductsBySubstring(substring, PageRequest.of(page, limit), owner));
-    }
+    public ResponseEntity<List<ProductDto>> getAllProductsBySubstring(int page,
+                                                                      int limit,
+                                                                      Long id,
+                                                                      String name,
+                                                                      Coordinates coordinates,
+                                                                      Long creationDateTimestampMs,
+                                                                      UnitOfMeasure unitOfMeasure,
+                                                                      Organization manufacturer,
+                                                                      Integer price,
+                                                                      Long manufactureCost,
+                                                                      Double rating,
+                                                                      Person owner,
+                                                                      User user,
+                                                                      String sortBy,
+                                                                      boolean ascending,
+                                                                      String substring) {
+        final ProductFilter productFilter = new ProductFilter(
+                id,
+                name,
+                convertUnixTimestampToLocalDate(creationDateTimestampMs),
+                coordinates,
+                unitOfMeasure,
+                manufacturer,
+                price,
+                manufactureCost,
+                rating,
+                owner,
+                user
+        );
+        final Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
-    @Override
-    public ResponseEntity<List<ProductDto>> getAllProductsByManufacturer(int page, int limit, Long id, String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        final Organization manufacturer = organizationMapper.toEntity(organizationService.getOrganizationById(id));
-        return ResponseEntity.ok(productService.getAllProductsByManufacturer(manufacturer, PageRequest.of(page, limit), owner));
+        return ResponseEntity.ok(productService.getAllProductsBySubstring(substring, PageRequest.of(page, limit, sort), productFilter));
     }
 
     @Override
     public ResponseEntity<Void> decreasePriceOnPercent(Integer percent, String token) {
-        final Person owner = userService.getUserByToken(getToken(token)).getPerson();
-        productService.decreasePriceOnPercent(percent, owner);
+        final User user = userService.getUserByToken(getToken(token));
+        productService.decreasePriceOnPercent(percent, user);
         return ResponseEntity.noContent().build();
     }
 
     private String getToken(String bearerToken) {
         return bearerToken.split(" ")[1];
+    }
+
+    private LocalDate convertUnixTimestampToLocalDate(Long unixTimestamp) {
+        if (unixTimestamp == null) {
+            return null;
+        }
+        return Instant
+                .ofEpochMilli(unixTimestamp)
+                .atOffset(ZoneOffset.UTC)
+                .toLocalDate();
     }
 }

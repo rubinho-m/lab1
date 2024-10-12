@@ -1,6 +1,6 @@
 package com.rubinho.lab1.rest;
 
-import com.rubinho.lab1.dto.PersonDto;
+import com.rubinho.lab1.dto.UserDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface AdminApi {
     @GetMapping("/admin")
-    ResponseEntity<List<PersonDto>> getAllPotentialAdmins(@RequestParam(defaultValue = "0") int page,
-                                                          @RequestParam(defaultValue = "5") int limit);
+    ResponseEntity<List<UserDto>> getAllPotentialAdmins(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "5") int limit);
 
     @PutMapping("/admin/{id}:admin")
     ResponseEntity<Void> addAdmin(@PathVariable("id") Long id);

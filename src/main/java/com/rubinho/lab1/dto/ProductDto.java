@@ -21,4 +21,5 @@ public class ProductDto {
     private long manufactureCost;
     private Double rating;
     private PersonDto owner;
+    private UserDto user;
 }

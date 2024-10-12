@@ -1,6 +1,6 @@
 package com.rubinho.lab1.rest.impl;
 
-import com.rubinho.lab1.dto.PersonDto;
+import com.rubinho.lab1.dto.UserDto;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.rest.AdminApi;
 import com.rubinho.lab1.services.AdminService;
@@ -21,7 +21,7 @@ public class AdminApiImpl implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<List<PersonDto>> getAllPotentialAdmins(int page, int limit) {
+    public ResponseEntity<List<UserDto>> getAllPotentialAdmins(int page, int limit) {
         return ResponseEntity.ok(adminService.getAllPotentialAdmins(PageRequest.of(page, limit)));
     }
 

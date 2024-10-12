@@ -10,6 +10,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,21 +30,27 @@ public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotBlank
     @Column(nullable = false)
     private String name;
+
     @Column
     @Enumerated(EnumType.STRING)
     private Color eyeColor;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Color hairColor;
+
     @JoinColumn
-    @ManyToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     private Location location;
+
     @Min(1)
     @Column
     private Integer height;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Country nationality;

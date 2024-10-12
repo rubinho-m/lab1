@@ -28,21 +28,27 @@ public class Organization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+
     @NotBlank
     @Column(nullable = false)
     private String name;
+
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Address officialAddress;
+
     @Min(1)
     @Column(nullable = false)
     private Integer annualTurnover;
+
     @Min(1)
     @Column
     private Long employeesCount;
+
     @Column(nullable = false)
     @Size(max = 1318, message = "{validation.name.size.too_long}")
     private String fullName;
+
     @Min(1)
     @Column(nullable = false)
     private Integer rating;
