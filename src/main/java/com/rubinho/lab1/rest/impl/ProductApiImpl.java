@@ -37,9 +37,7 @@ public class ProductApiImpl implements ProductApi {
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto, String token) {
         final User user = userService.getUserByToken(getToken(token));
-        final HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.setAccessControlAllowOrigin("*");
-        return new ResponseEntity<>(productService.createProduct(productDto, user), responseHeaders, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, user));
     }
 
     @Override
