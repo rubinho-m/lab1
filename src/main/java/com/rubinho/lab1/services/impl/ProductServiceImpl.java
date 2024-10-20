@@ -9,11 +9,13 @@ import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.ProductSpecificationService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -42,7 +44,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto getProductById(long id) {
-        final Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         return productMapper.toDto(product);
     }
 
@@ -67,7 +70,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void checkUser(long id, User user) {
-        final Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         if (product.getUser().equals(user) || user.getRole().equals(Role.ADMIN)) {
             return;
         }
@@ -76,7 +80,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void removeByRating(Double rating, User user) {
-        final Product product = productRepository.findByUserAndRating(user, rating).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findByUserAndRating(user, rating)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         productRepository.delete(product);
     }
 
@@ -100,6 +105,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void decreasePriceOnPercent(Integer percent, User user) {
         final List<Product> products = productRepository.findAllByUser(user);
         for (Product product : products) {

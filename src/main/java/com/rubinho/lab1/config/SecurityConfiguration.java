@@ -56,8 +56,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/register").permitAll()
                         .requestMatchers("/login").permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().denyAll()
                 );
 
         return http.build();
