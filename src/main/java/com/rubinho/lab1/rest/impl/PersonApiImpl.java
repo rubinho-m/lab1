@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 public class PersonApiImpl implements PersonApi {
     private final PersonService personService;
 

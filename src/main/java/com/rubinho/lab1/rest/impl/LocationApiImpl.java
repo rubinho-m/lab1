@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 public class LocationApiImpl implements LocationApi {
     private final LocationService locationService;
 

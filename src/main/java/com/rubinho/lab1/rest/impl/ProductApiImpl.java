@@ -13,9 +13,9 @@ import com.rubinho.lab1.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Instant;
@@ -24,7 +24,6 @@ import java.time.ZoneOffset;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 public class ProductApiImpl implements ProductApi {
     private final ProductService productService;
     private final UserService userService;
@@ -38,7 +37,9 @@ public class ProductApiImpl implements ProductApi {
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto, String token) {
         final User user = userService.getUserByToken(getToken(token));
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, user));
+        final HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.setAccessControlAllowOrigin("*");
+        return new ResponseEntity<>(productService.createProduct(productDto, user), responseHeaders, HttpStatus.CREATED);
     }
 
     @Override

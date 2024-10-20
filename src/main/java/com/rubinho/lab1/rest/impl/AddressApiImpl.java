@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 public class AddressApiImpl implements AddressApi {
     private final AddressService addressService;
 

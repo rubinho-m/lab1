@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@CrossOrigin("*")
 public class OrganizationApiImpl implements OrganizationApi {
     private final OrganizationService organizationService;
 
