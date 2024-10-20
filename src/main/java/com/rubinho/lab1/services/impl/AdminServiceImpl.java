@@ -35,7 +35,8 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public void setNewRoleToPotentialAdmin(Long id, Role role) {
-        final User user = userRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        final User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         user.setRole(role);
         userRepository.save(user);
     }

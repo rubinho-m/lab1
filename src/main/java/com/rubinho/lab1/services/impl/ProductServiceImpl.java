@@ -42,7 +42,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto getProductById(long id) {
-        final Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         return productMapper.toDto(product);
     }
 
@@ -67,7 +68,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void checkUser(long id, User user) {
-        final Product product = productRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         if (product.getUser().equals(user) || user.getRole().equals(Role.ADMIN)) {
             return;
         }
@@ -76,7 +78,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void removeByRating(Double rating, User user) {
-        final Product product = productRepository.findByUserAndRating(user, rating).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
+        final Product product = productRepository.findByUserAndRating(user, rating)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
         productRepository.delete(product);
     }
 

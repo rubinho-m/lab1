@@ -49,7 +49,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String authorize(AuthDto authDto) {
-        final User user = userRepository.findByLogin(authDto.getLogin()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
+        final User user = userRepository.findByLogin(authDto.getLogin())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
         final String requestPassword = encodePassword(authDto.getPassword());
         if (requestPassword.equals(user.getPassword())) {
             return userAuthProvider.createToken(user.getLogin(), user.getRole());
@@ -60,7 +61,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByToken(String token) {
         final String login = userAuthProvider.getLoginFromJwt(token);
-        return userRepository.findByLogin(login).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
+        return userRepository.findByLogin(login)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
     }
 
     private String encodePassword(String password) {
