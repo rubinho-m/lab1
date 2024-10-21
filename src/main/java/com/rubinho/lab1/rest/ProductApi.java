@@ -50,7 +50,7 @@ public interface ProductApi {
     @DeleteMapping("/products/{id}")
     ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id, @RequestHeader(name = "Authorization") String token);
 
-    @DeleteMapping("/products/{rating}")
+    @DeleteMapping("/products/rating/{rating}")
     ResponseEntity<Void> removeByRating(@PathVariable("rating") Double rating, @RequestHeader(name = "Authorization") String token);
 
     @GetMapping("/products/rating")
