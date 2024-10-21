@@ -114,7 +114,8 @@ public class ProductServiceImpl implements ProductService {
     public void decreasePriceOnPercent(Integer percent, User user) {
         final List<Product> products = productRepository.findAllByUser(user);
         for (Product product : products) {
-            product.setPrice(product.getPrice() * (1 - percent / 100));
+            final int newPrice = (int) Math.round(product.getPrice() * (1 - (double) percent / (double) 100));
+            product.setPrice(newPrice);
             productRepository.save(product);
         }
     }
