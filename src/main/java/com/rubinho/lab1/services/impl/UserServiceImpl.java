@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -63,6 +64,17 @@ public class UserServiceImpl implements UserService {
         final String login = userAuthProvider.getLoginFromJwt(token);
         return userRepository.findByLogin(login)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
+    }
+
+    @Override
+    public User getUserByLogin(String login) {
+        return userRepository.findByLogin(login)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
+    }
+
+    @Override
+    public List<String> getAllUserNames() {
+        return userRepository.findAll().stream().map(User::getLogin).toList();
     }
 
     private String encodePassword(String password) {

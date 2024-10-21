@@ -41,7 +41,7 @@ public interface ProductApi {
                                                     @RequestParam(value = "manufactureCost", required = false) Long manufactureCost,
                                                     @RequestParam(value = "rating", required = false) Double rating,
                                                     @RequestParam(value = "owner", required = false) Person owner,
-                                                    @RequestParam(value = "user", required = false) User user,
+                                                    @RequestParam(value = "login", required = false) String login,
                                                     @RequestParam(defaultValue = "id") String sortBy,
                                                     @RequestParam(defaultValue = "true") boolean ascending);
 
@@ -70,7 +70,7 @@ public interface ProductApi {
                                                                @RequestParam(value = "manufactureCost", required = false) Long manufactureCost,
                                                                @RequestParam(value = "rating", required = false) Double rating,
                                                                @RequestParam(value = "owner", required = false) Person owner,
-                                                               @RequestParam(value = "user", required = false) User user,
+                                                               @RequestParam(value = "login", required = false) String login,
                                                                @RequestParam(defaultValue = "id") String sortBy,
                                                                @RequestParam(defaultValue = "true") boolean ascending,
                                                                @PathVariable("substring") String substring);

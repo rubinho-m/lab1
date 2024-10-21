@@ -13,7 +13,6 @@ import com.rubinho.lab1.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,7 +57,7 @@ public class ProductApiImpl implements ProductApi {
                                                            Long manufactureCost,
                                                            Double rating,
                                                            Person owner,
-                                                           User user,
+                                                           String login,
                                                            String sortBy,
                                                            boolean ascending) {
         final ProductFilter productFilter = new ProductFilter(
@@ -72,7 +71,7 @@ public class ProductApiImpl implements ProductApi {
                 manufactureCost,
                 rating,
                 owner,
-                user
+                userService.getUserByLogin(login)
         );
         final Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
@@ -120,7 +119,7 @@ public class ProductApiImpl implements ProductApi {
                                                                       Long manufactureCost,
                                                                       Double rating,
                                                                       Person owner,
-                                                                      User user,
+                                                                      String login,
                                                                       String sortBy,
                                                                       boolean ascending,
                                                                       String substring) {
@@ -135,7 +134,7 @@ public class ProductApiImpl implements ProductApi {
                 manufactureCost,
                 rating,
                 owner,
-                user
+                userService.getUserByLogin(login)
         );
         final Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 
