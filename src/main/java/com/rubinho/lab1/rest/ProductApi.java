@@ -5,7 +5,6 @@ import com.rubinho.lab1.model.Coordinates;
 import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Person;
 import com.rubinho.lab1.model.UnitOfMeasure;
-import com.rubinho.lab1.model.User;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;

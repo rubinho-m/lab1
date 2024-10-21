@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUserByLogin(String login) {
         return userRepository.findByLogin(login)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
+                .orElse(null);
     }
 
     @Override
