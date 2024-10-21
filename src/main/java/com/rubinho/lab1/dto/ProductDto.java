@@ -22,4 +22,5 @@ public class ProductDto {
     private Double rating;
     private PersonDto owner;
     private UserDto user;
+    private int totalPages;
 }

@@ -11,6 +11,7 @@ import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.ProductSpecificationService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -52,9 +53,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> getAllProducts(Pageable paging, ProductFilter productFilter) {
         final Specification<Product> spec = productSpecificationService.filterBy(productFilter);
-        return productRepository.findAll(spec, paging)
+        final Page<Product> productPage = productRepository.findAll(spec, paging);
+        return productPage
                 .stream()
                 .map(productMapper::toDto)
+                .peek(productDto -> productDto.setTotalPages(productPage.getTotalPages()))
                 .toList();
     }
 
@@ -97,10 +100,12 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> getAllProductsBySubstring(String substring, Pageable paging, ProductFilter productFilter) {
         final Specification<Product> spec = productSpecificationService.filterBy(productFilter);
-        return productRepository.findAll(spec, paging)
+        final Page<Product> productPage = productRepository.findAll(spec, paging);
+        return productPage
                 .stream()
                 .filter(product -> product.getName().contains(substring))
                 .map(productMapper::toDto)
+                .peek(productDto -> productDto.setTotalPages(productPage.getTotalPages()))
                 .toList();
     }
 
