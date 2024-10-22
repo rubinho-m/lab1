@@ -43,7 +43,7 @@ public class Person {
     private Color hairColor;
 
     @JoinColumn
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     private Location location;
 
     @Min(1)

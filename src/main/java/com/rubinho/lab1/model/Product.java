@@ -16,6 +16,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.validation.constraints.DecimalMin;
@@ -39,7 +40,7 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @OneToOne(cascade = {CascadeType.ALL})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
     @JoinColumn(nullable = false)
     private Coordinates coordinates;
 
@@ -52,7 +53,7 @@ public class Product {
     private UnitOfMeasure unitOfMeasure;
 
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Organization manufacturer;
 
     @Min(1)
@@ -67,7 +68,7 @@ public class Product {
     private Double rating;
 
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = CascadeType.MERGE)
     private Person owner;
 
     @JoinColumn

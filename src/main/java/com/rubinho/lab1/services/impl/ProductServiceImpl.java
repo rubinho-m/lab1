@@ -2,11 +2,18 @@ package com.rubinho.lab1.services.impl;
 
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.mappers.ProductMapper;
+import com.rubinho.lab1.model.Address;
 import com.rubinho.lab1.model.Coordinates;
+import com.rubinho.lab1.model.Organization;
+import com.rubinho.lab1.model.Person;
 import com.rubinho.lab1.model.Product;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
+import com.rubinho.lab1.repository.AddressRepository;
 import com.rubinho.lab1.repository.CoordinatesRepository;
+import com.rubinho.lab1.repository.LocationRepository;
+import com.rubinho.lab1.repository.OrganizationRepository;
+import com.rubinho.lab1.repository.PersonRepository;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
 import com.rubinho.lab1.services.ProductService;
@@ -27,6 +34,10 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
+    private final OrganizationRepository organizationRepository;
+    private final AddressRepository addressRepository;
+    private final PersonRepository personRepository;
+    private final LocationRepository locationRepository;
     private final CoordinatesRepository coordinatesRepository;
     private final ProductMapper productMapper;
     private final ProductSpecificationService productSpecificationService;
@@ -34,12 +45,20 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CoordinatesRepository coordinatesRepository,
+                              OrganizationRepository organizationRepository,
+                              AddressRepository addressRepository,
+                              PersonRepository personRepository,
+                              LocationRepository locationRepository,
                               ProductMapper productMapper,
                               ProductSpecificationService productSpecificationService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.productSpecificationService = productSpecificationService;
         this.coordinatesRepository = coordinatesRepository;
+        this.organizationRepository = organizationRepository;
+        this.addressRepository = addressRepository;
+        this.personRepository = personRepository;
+        this.locationRepository = locationRepository;
     }
 
     @Override
@@ -47,6 +66,7 @@ public class ProductServiceImpl implements ProductService {
         final Product product = productMapper.toEntity(productDto);
         product.setUser(user);
         try {
+            saveEmbedded(product);
             return productMapper.toDto(productRepository.save(product));
         } catch (DataIntegrityViolationException e) {
             final Coordinates coordinates = product.getCoordinates();
@@ -78,7 +98,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto updateProduct(ProductDto productDto) {
-        return productMapper.toDto(productRepository.save(productMapper.toEntity(productDto)));
+        final Product product = productMapper.toEntity(productDto);
+        return productMapper.toDto(productRepository.save(product));
     }
 
     @Override
@@ -133,5 +154,17 @@ public class ProductServiceImpl implements ProductService {
             product.setPrice(newPrice);
             productRepository.save(product);
         }
+    }
+
+    private void saveEmbedded(Product product) {
+        final Organization organization = product.getManufacturer();
+        final Address address = organization.getOfficialAddress();
+        locationRepository.save(address.getTown());
+        addressRepository.save(address);
+        organizationRepository.save(organization);
+        final Person person = product.getOwner();
+        locationRepository.save(person.getLocation());
+        personRepository.save(person);
+        coordinatesRepository.save(product.getCoordinates());
     }
 }
