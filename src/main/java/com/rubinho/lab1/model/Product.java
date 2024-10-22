@@ -52,7 +52,7 @@ public class Product {
     private UnitOfMeasure unitOfMeasure;
 
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Organization manufacturer;
 
     @Min(1)
@@ -67,7 +67,7 @@ public class Product {
     private Double rating;
 
     @JoinColumn
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Person owner;
 
     @JoinColumn
