@@ -62,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public ProductDto createProduct(ProductDto productDto, User user) {
         final Product product = productMapper.toEntity(productDto);
         product.setUser(user);
