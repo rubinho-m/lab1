@@ -56,7 +56,7 @@ public interface ProductApi {
     @GetMapping("/products/rating")
     ResponseEntity<Double> sumRating(@RequestHeader(name = "Authorization") String token);
 
-    @GetMapping("/products/{substring}")
+    @GetMapping("/products/substring/{substring}")
     ResponseEntity<List<ProductDto>> getAllProductsBySubstring(@RequestParam(defaultValue = "0") @Min(0) int page,
                                                                @RequestParam(defaultValue = "5") @Min(0) int limit,
                                                                @RequestParam(value = "id", required = false) Long id,
