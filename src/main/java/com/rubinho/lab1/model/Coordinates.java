@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +19,9 @@ import javax.validation.constraints.Max;
 @Builder
 @Data
 @Entity
-@Table(name = "coordinates")
+@Table(name = "coordinates", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"x", "y"})
+})
 public class Coordinates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
