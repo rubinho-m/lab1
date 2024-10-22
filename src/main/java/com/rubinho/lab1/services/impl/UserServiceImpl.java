@@ -1,10 +1,10 @@
 package com.rubinho.lab1.services.impl;
 
 import com.rubinho.lab1.dto.AuthDto;
+import com.rubinho.lab1.dto.RegisteredUserDto;
 import com.rubinho.lab1.dto.SignUpDto;
 import com.rubinho.lab1.jwt.UserAuthProvider;
 import com.rubinho.lab1.mappers.UserMapper;
-import com.rubinho.lab1.model.RegistrationInfo;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.UserRepository;
@@ -34,27 +34,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RegistrationInfo register(SignUpDto signUpDto) {
+    public RegisteredUserDto register(SignUpDto signUpDto) {
         final User user = userMapper.toEntity(signUpDto);
-        boolean success = true;
         user.setPassword(encodePassword(signUpDto.getPassword()));
-        if (user.getRole().equals(Role.ADMIN)) {
-            if (userRepository.existsByRole(Role.ADMIN)) {
-                user.setRole(Role.POTENTIAL_ADMIN);
-                success = false;
-            }
-        }
+        user.setRole(Role.USER);
         userRepository.save(user);
-        return new RegistrationInfo(userAuthProvider.createToken(user.getLogin(), user.getRole()), success);
+        final RegisteredUserDto registeredUserDto = userMapper.toRegisteredUserDto(user);
+        registeredUserDto.setToken(userAuthProvider.createToken(user.getLogin(), user.getRole()));
+        return registeredUserDto;
     }
 
     @Override
-    public String authorize(AuthDto authDto) {
+    public RegisteredUserDto authorize(AuthDto authDto) {
         final User user = userRepository.findByLogin(authDto.getLogin())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "No such user"));
         final String requestPassword = encodePassword(authDto.getPassword());
         if (requestPassword.equals(user.getPassword())) {
-            return userAuthProvider.createToken(user.getLogin(), user.getRole());
+            final RegisteredUserDto registeredUserDto = userMapper.toRegisteredUserDto(user);
+            registeredUserDto.setToken(userAuthProvider.createToken(user.getLogin(), user.getRole()));
+            return registeredUserDto;
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Bad credentials");
     }
@@ -75,6 +73,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<String> getAllUserNames() {
         return userRepository.findAll().stream().map(User::getLogin).toList();
+    }
+
+    @Override
+    public boolean requestAdminRights(String token) {
+        final User user = getUserByToken(token.split(" ")[1]);
+        if (userRepository.existsByRole(Role.ADMIN)) {
+            user.setRole(Role.POTENTIAL_ADMIN);
+            userRepository.save(user);
+            return false;
+        }
+        user.setRole(Role.ADMIN);
+        userRepository.save(user);
+        return true;
     }
 
     private String encodePassword(String password) {
