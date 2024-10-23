@@ -1,7 +1,5 @@
 package com.rubinho.lab1.rest.impl;
 
-import com.rubinho.lab1.dto.RegisteredUserDto;
-import com.rubinho.lab1.mappers.UserMapper;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.rest.UserApi;
 import com.rubinho.lab1.services.UserService;
@@ -26,7 +24,7 @@ public class UserApiImpl implements UserApi {
     }
 
     @Override
-    public ResponseEntity<Role> getUser(String token) {
+    public ResponseEntity<Role> getRole(String token) {
         return ResponseEntity.ok(userService.getUserByToken(token.split(" ")[1]).getRole());
     }
 }

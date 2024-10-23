@@ -12,5 +12,5 @@ public interface UserApi {
     ResponseEntity<List<String>> getAllUserNames();
 
     @GetMapping("/role/current")
-    ResponseEntity<Role> getUser(@RequestHeader("Authorization") String token);
+    ResponseEntity<Role> getRole(@RequestHeader("Authorization") String token);
 }
