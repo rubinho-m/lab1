@@ -120,9 +120,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void removeByRating(Double rating, User user) {
-        final Product product = productRepository.findByUserAndRating(user, rating)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found by this id"));
-        productRepository.delete(product);
+        final List<Product> products = productRepository.findAllByUserAndRating(user, rating);
+        if (products.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No product found");
+        }
+        productRepository.delete(products.get(0));
     }
 
     @Override
