@@ -32,6 +32,6 @@ public class Address {
     private String zipCode;
 
     @JoinColumn(nullable = false)
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE})
     private Location town;
 }

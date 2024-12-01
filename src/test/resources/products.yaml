@@ -1,0 +1,36 @@
+- coordinates:
+    x: 21
+    y: 3e+0
+  manufactureCost: 1111
+  manufacturer:
+    annualTurnover: 1
+    employeesCount: 100
+    fullName: organization
+    name: org
+    officialAddress:
+      id: 1
+      town:
+        id: 1
+        name: town
+        x: 22
+        y: 2e+0
+        z: 3
+      zipCode: '456123'
+    rating: 100
+  name: product
+  owner:
+    eyeColor: BLUE
+    hairColor: WHITE
+    height: 183
+    id: 1
+    location:
+      id: 2
+      name: home
+      x: 22
+      y: 6e+0
+      z: 7
+    name: Mike
+    nationality: UNITED_KINGDOM
+  price: 500
+  rating: 1e+2
+  unitOfMeasure: CENTIMETERS

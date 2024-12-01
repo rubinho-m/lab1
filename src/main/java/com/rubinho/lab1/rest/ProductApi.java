@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -23,6 +24,15 @@ import java.util.List;
 public interface ProductApi {
     @PostMapping(value = "/products", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
     ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto, @RequestHeader(name = "Authorization") String token);
+
+    @PostMapping(value = "/products/error", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
+    ResponseEntity<ProductDto> createErrorProduct(@RequestBody ProductDto productDto, @RequestHeader(name = "Authorization") String token);
+
+    @PostMapping(value = "/products/many", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
+    ResponseEntity<List<ProductDto>> createProducts(@RequestBody List<ProductDto> productsDto, @RequestHeader(name = "Authorization") String token);
+
+    @PostMapping(value = "/products/import")
+    ResponseEntity<List<ProductDto>> createProductsFromFile(@RequestParam("file") MultipartFile file, @RequestHeader(name = "Authorization") String token);
 
     @GetMapping("/products/{id}")
     ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id);

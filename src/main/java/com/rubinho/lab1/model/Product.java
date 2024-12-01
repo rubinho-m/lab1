@@ -34,13 +34,13 @@ import java.time.LocalDate;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotBlank
     @Column(nullable = false)
     private String name;
 
-    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH, CascadeType.REMOVE})
     @JoinColumn(nullable = false)
     private Coordinates coordinates;
 
@@ -53,7 +53,7 @@ public class Product {
     private UnitOfMeasure unitOfMeasure;
 
     @JoinColumn
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Organization manufacturer;
 
     @Min(1)
@@ -68,7 +68,7 @@ public class Product {
     private Double rating;
 
     @JoinColumn
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Person owner;
 
     @JoinColumn

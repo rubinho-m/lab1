@@ -37,6 +37,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     implementation 'org.mapstruct:mapstruct:1.6.2'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.2'
 }
 
 tasks.named('test') {

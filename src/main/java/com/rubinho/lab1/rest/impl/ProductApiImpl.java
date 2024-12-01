@@ -8,6 +8,7 @@ import com.rubinho.lab1.model.UnitOfMeasure;
 import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.rest.ProductApi;
+import com.rubinho.lab1.services.ConverterService;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -25,18 +28,47 @@ import java.util.List;
 @RestController
 public class ProductApiImpl implements ProductApi {
     private final ProductService productService;
+    private final ConverterService converterService;
     private final UserService userService;
 
     @Autowired
-    public ProductApiImpl(ProductService productService, UserService userService) {
+    public ProductApiImpl(ProductService productService,
+                          UserService userService,
+                          ConverterService converterService) {
         this.productService = productService;
         this.userService = userService;
+        this.converterService = converterService;
     }
 
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto, String token) {
         final User user = userService.getUserByToken(getToken(token));
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, user));
+    }
+
+    @Override
+    public ResponseEntity<ProductDto> createErrorProduct(ProductDto productDto, String token) {
+        final User user = userService.getUserByToken(getToken(token));
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createErrorProduct(productDto, user));
+    }
+
+    @Override
+    public ResponseEntity<List<ProductDto>> createProducts(List<ProductDto> productsDto, String token) {
+        final User user = userService.getUserByToken(getToken(token));
+//        return ResponseEntity.status(HttpStatus.CREATED).body(
+//                productService.createProducts(productsDto, user)
+//        );
+        return ResponseEntity.ok(productsDto);
+    }
+
+    @Override
+    public ResponseEntity<List<ProductDto>> createProductsFromFile(MultipartFile file, String token) {
+        try {
+            final String content = new String(file.getBytes());
+            return ResponseEntity.ok(converterService.toList(content));
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.rubinho.lab1.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,14 +27,14 @@ import javax.validation.constraints.Size;
 public class Organization {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotBlank
     @Column(nullable = false)
     private String name;
 
     @JoinColumn
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private Address officialAddress;
 
     @Min(1)
