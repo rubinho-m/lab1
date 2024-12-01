@@ -1,5 +1,6 @@
 package com.rubinho.lab1.services.impl;
 
+import com.rubinho.lab1.dto.ImportAuditDto;
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.mappers.ProductMapper;
 import com.rubinho.lab1.model.Coordinates;
@@ -9,6 +10,7 @@ import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.CoordinatesRepository;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
+import com.rubinho.lab1.services.ImportAuditService;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.ProductSpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,15 +33,18 @@ public class ProductServiceImpl implements ProductService {
     private final CoordinatesRepository coordinatesRepository;
     private final ProductMapper productMapper;
     private final ProductSpecificationService productSpecificationService;
+    private final ImportAuditService importAuditService;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CoordinatesRepository coordinatesRepository,
                               ProductMapper productMapper,
-                              ProductSpecificationService productSpecificationService) {
+                              ProductSpecificationService productSpecificationService,
+                              ImportAuditService importAuditService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.productSpecificationService = productSpecificationService;
+        this.importAuditService = importAuditService;
         this.coordinatesRepository = coordinatesRepository;
     }
 
@@ -59,26 +65,30 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public ProductDto createErrorProduct(ProductDto productDto, User user) {
-        final Product product = productMapper.toEntity(productDto);
-        product.setUser(user);
-        try {
-            productRepository.save(product);
-            throw new RuntimeException("TEST EXCEPTION");
-        } catch (DataIntegrityViolationException e) {
-            final Coordinates coordinates = product.getCoordinates();
-            if (coordinatesRepository.existsByXAndY(coordinates.getX(), coordinates.getY())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordinates already exist");
-            }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location already exists");
-        }
-    }
-
-    @Override
     @Transactional
     public List<ProductDto> createProducts(List<ProductDto> productsDto, User user) {
-        return List.of();
+        final List<Product> products = new ArrayList<>();
+
+        for (ProductDto productDto : productsDto) {
+            final Product product = productMapper.toEntity(productDto);
+            product.setUser(user);
+            try {
+                products.add(productRepository.save(product));
+            } catch (Exception e) {
+                importAuditService.addImportAudit(
+                        new ImportAuditDto(null, false, 0),
+                        user
+                );
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One of the products is bad");
+            }
+        }
+        importAuditService.addImportAudit(
+                new ImportAuditDto(null, true, products.size()),
+                user
+        );
+        return products.stream()
+                .map(productMapper::toDto)
+                .toList();
     }
 
     @Override

@@ -25,9 +25,6 @@ public interface ProductApi {
     @PostMapping(value = "/products", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
     ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto, @RequestHeader(name = "Authorization") String token);
 
-    @PostMapping(value = "/products/error", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
-    ResponseEntity<ProductDto> createErrorProduct(@RequestBody ProductDto productDto, @RequestHeader(name = "Authorization") String token);
-
     @PostMapping(value = "/products/many", consumes = MediaType.APPLICATION_JSON_VALUE + "; charset=utf-8")
     ResponseEntity<List<ProductDto>> createProducts(@RequestBody List<ProductDto> productsDto, @RequestHeader(name = "Authorization") String token);
 

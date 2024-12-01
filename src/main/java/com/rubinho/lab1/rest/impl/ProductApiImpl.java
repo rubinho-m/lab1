@@ -43,29 +43,28 @@ public class ProductApiImpl implements ProductApi {
     @Override
     public ResponseEntity<ProductDto> createProduct(ProductDto productDto, String token) {
         final User user = userService.getUserByToken(getToken(token));
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productDto, user));
-    }
-
-    @Override
-    public ResponseEntity<ProductDto> createErrorProduct(ProductDto productDto, String token) {
-        final User user = userService.getUserByToken(getToken(token));
-        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createErrorProduct(productDto, user));
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(productService.createProduct(productDto, user));
     }
 
     @Override
     public ResponseEntity<List<ProductDto>> createProducts(List<ProductDto> productsDto, String token) {
         final User user = userService.getUserByToken(getToken(token));
-//        return ResponseEntity.status(HttpStatus.CREATED).body(
-//                productService.createProducts(productsDto, user)
-//        );
-        return ResponseEntity.ok(productsDto);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(productService.createProducts(productsDto, user));
     }
 
     @Override
     public ResponseEntity<List<ProductDto>> createProductsFromFile(MultipartFile file, String token) {
         try {
+            final User user = userService.getUserByToken(getToken(token));
             final String content = new String(file.getBytes());
-            return ResponseEntity.ok(converterService.toList(content));
+            final List<ProductDto> productsDto = converterService.toList(content);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(productService.createProducts(productsDto, user));
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }

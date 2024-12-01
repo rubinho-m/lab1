@@ -10,8 +10,6 @@ import java.util.List;
 public interface ProductService {
     ProductDto createProduct(ProductDto productDto, User user);
 
-    ProductDto createErrorProduct(ProductDto productDto, User user);
-
     List<ProductDto> createProducts(List<ProductDto> productsDto, User user);
 
     ProductDto getProductById(long id);
