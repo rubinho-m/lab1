@@ -4,6 +4,7 @@ import com.rubinho.lab1.dto.ImportAuditDto;
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.mappers.ProductMapper;
 import com.rubinho.lab1.model.Coordinates;
+import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Product;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
@@ -53,12 +54,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProductDto createProduct(ProductDto productDto, User user) {
         final Product product = productMapper.toEntity(productDto);
         product.setUser(user);
         try {
-            if (organizationFullNameExists(product)){
+            if (organizationFullNameExists(product)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Организация с таким названием уже существует");
             }
             return productMapper.toDto(productRepository.save(product));
@@ -72,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<ProductDto> createProducts(List<ProductDto> productsDto, User user) {
         final List<Product> products = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class ProductServiceImpl implements ProductService {
             final Product product = productMapper.toEntity(productDto);
             product.setUser(user);
             try {
-                if (organizationFullNameExists(product)){
+                if (organizationFullNameExists(product)) {
                     throw new IllegalStateException();
                 }
                 products.add(productRepository.save(product));
@@ -181,8 +181,12 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    private boolean organizationFullNameExists(Product product){
-        final String organizationFullName = product.getManufacturer().getFullName();
+    private boolean organizationFullNameExists(Product product) {
+        final Organization organization = product.getManufacturer();
+        if (organizationRepository.existsById(organization.getId())) {
+            return false;
+        }
+        final String organizationFullName = organization.getFullName();
         return organizationRepository.existsByFullName(organizationFullName);
     }
 }
