@@ -1,7 +1,5 @@
 package com.rubinho.lab1.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.rubinho.lab1.dto.AddressDto;
 import com.rubinho.lab1.dto.CoordinatesDto;
 import com.rubinho.lab1.dto.LocationDto;
@@ -23,8 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConverterServiceTest {
-    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory()).findAndRegisterModules();
-    private final ConverterService converterService = new ConverterServiceImpl(objectMapper);
+    private final ConverterService converterService = new ConverterServiceImpl();
 
     @Test
     @DisplayName("Список продуктов должен распарситься из строки в список")

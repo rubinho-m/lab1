@@ -12,7 +12,7 @@ import java.util.List;
 
 @Service
 public class ConverterServiceImpl implements ConverterService {
-    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory());
+    private final ObjectMapper objectMapper = new ObjectMapper(new YAMLFactory()).findAndRegisterModules();
 
     @Override
     public List<ProductDto> toList(String content) throws JsonProcessingException {
