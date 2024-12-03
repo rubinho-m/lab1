@@ -27,9 +27,7 @@ public class ImportAuditServiceImpl implements ImportAuditService {
     }
 
     @Override
-    public void addImportAudit(ImportAuditDto importAuditDto, User user) {
-        final ImportAudit importAudit = importAuditMapper.toEntity(importAuditDto);
-        importAudit.setUser(user);
+    public void addImportAudit(ImportAudit importAudit) {
         importAuditRepository.save(importAudit);
     }
 

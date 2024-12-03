@@ -1,9 +1,9 @@
 package com.rubinho.lab1.services.impl;
 
-import com.rubinho.lab1.dto.ImportAuditDto;
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.mappers.ProductMapper;
 import com.rubinho.lab1.model.Coordinates;
+import com.rubinho.lab1.model.ImportAudit;
 import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Product;
 import com.rubinho.lab1.model.Role;
@@ -86,15 +86,13 @@ public class ProductServiceImpl implements ProductService {
                 products.add(productRepository.save(product));
             } catch (Exception e) {
                 importAuditService.addImportAudit(
-                        new ImportAuditDto(null, false, 0),
-                        user
+                        new ImportAudit(null, false, 0, user)
                 );
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
             }
         }
         importAuditService.addImportAudit(
-                new ImportAuditDto(null, true, products.size()),
-                user
+                new ImportAudit(null, true, products.size(), user)
         );
         return products.stream()
                 .map(productMapper::toDto)
