@@ -8,6 +8,7 @@ import com.rubinho.lab1.model.Product;
 import com.rubinho.lab1.model.Role;
 import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.CoordinatesRepository;
+import com.rubinho.lab1.repository.OrganizationRepository;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
 import com.rubinho.lab1.services.ImportAuditService;
@@ -31,6 +32,7 @@ import java.util.List;
 public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final CoordinatesRepository coordinatesRepository;
+    private final OrganizationRepository organizationRepository;
     private final ProductMapper productMapper;
     private final ProductSpecificationService productSpecificationService;
     private final ImportAuditService importAuditService;
@@ -38,6 +40,7 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CoordinatesRepository coordinatesRepository,
+                              OrganizationRepository organizationRepository,
                               ProductMapper productMapper,
                               ProductSpecificationService productSpecificationService,
                               ImportAuditService importAuditService) {
@@ -46,6 +49,7 @@ public class ProductServiceImpl implements ProductService {
         this.productSpecificationService = productSpecificationService;
         this.importAuditService = importAuditService;
         this.coordinatesRepository = coordinatesRepository;
+        this.organizationRepository = organizationRepository;
     }
 
     @Override
@@ -54,13 +58,16 @@ public class ProductServiceImpl implements ProductService {
         final Product product = productMapper.toEntity(productDto);
         product.setUser(user);
         try {
+            if (organizationFullNameExists(product)){
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Организация с таким названием уже существует");
+            }
             return productMapper.toDto(productRepository.save(product));
         } catch (DataIntegrityViolationException e) {
             final Coordinates coordinates = product.getCoordinates();
             if (coordinatesRepository.existsByXAndY(coordinates.getX(), coordinates.getY())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Coordinates already exist");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такие координаты уже существуют");
             }
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location already exists");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такая локация уже существует");
         }
     }
 
@@ -73,13 +80,16 @@ public class ProductServiceImpl implements ProductService {
             final Product product = productMapper.toEntity(productDto);
             product.setUser(user);
             try {
+                if (organizationFullNameExists(product)){
+                    throw new IllegalStateException();
+                }
                 products.add(productRepository.save(product));
             } catch (Exception e) {
                 importAuditService.addImportAudit(
                         new ImportAuditDto(null, false, 0),
                         user
                 );
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One of the products is bad");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
             }
         }
         importAuditService.addImportAudit(
@@ -169,5 +179,10 @@ public class ProductServiceImpl implements ProductService {
             product.setPrice(newPrice);
             productRepository.save(product);
         }
+    }
+
+    private boolean organizationFullNameExists(Product product){
+        final String organizationFullName = product.getManufacturer().getFullName();
+        return organizationRepository.existsByFullName(organizationFullName);
     }
 }
