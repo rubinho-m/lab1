@@ -3,7 +3,6 @@ package com.rubinho.lab1.services.impl;
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.mappers.ProductMapper;
 import com.rubinho.lab1.model.Coordinates;
-import com.rubinho.lab1.model.ImportAudit;
 import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Product;
 import com.rubinho.lab1.model.Role;
@@ -12,7 +11,6 @@ import com.rubinho.lab1.repository.CoordinatesRepository;
 import com.rubinho.lab1.repository.OrganizationRepository;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
-import com.rubinho.lab1.services.ImportAuditService;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.ProductSpecificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,19 +34,16 @@ public class ProductServiceImpl implements ProductService {
     private final OrganizationRepository organizationRepository;
     private final ProductMapper productMapper;
     private final ProductSpecificationService productSpecificationService;
-    private final ImportAuditService importAuditService;
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CoordinatesRepository coordinatesRepository,
                               OrganizationRepository organizationRepository,
                               ProductMapper productMapper,
-                              ProductSpecificationService productSpecificationService,
-                              ImportAuditService importAuditService) {
+                              ProductSpecificationService productSpecificationService) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.productSpecificationService = productSpecificationService;
-        this.importAuditService = importAuditService;
         this.coordinatesRepository = coordinatesRepository;
         this.organizationRepository = organizationRepository;
     }
@@ -75,28 +70,23 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<ProductDto> createProducts(List<ProductDto> productsDto, User user) {
         final List<Product> products = new ArrayList<>();
+        try {
+            for (ProductDto productDto : productsDto) {
+                final Product product = productMapper.toEntity(productDto);
+                product.setUser(user);
 
-        for (ProductDto productDto : productsDto) {
-            final Product product = productMapper.toEntity(productDto);
-            product.setUser(user);
-            try {
                 if (organizationFullNameExists(product)) {
                     throw new IllegalStateException();
                 }
                 products.add(productRepository.save(product));
-            } catch (Exception e) {
-                importAuditService.addImportAudit(
-                        new ImportAudit(null, false, 0, user)
-                );
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
+
             }
+            return products.stream()
+                    .map(productMapper::toDto)
+                    .toList();
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
         }
-        importAuditService.addImportAudit(
-                new ImportAudit(null, true, products.size(), user)
-        );
-        return products.stream()
-                .map(productMapper::toDto)
-                .toList();
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.rubinho.lab1.rest.impl;
 
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.model.Coordinates;
+import com.rubinho.lab1.model.ImportAudit;
 import com.rubinho.lab1.model.Organization;
 import com.rubinho.lab1.model.Person;
 import com.rubinho.lab1.model.UnitOfMeasure;
@@ -9,6 +10,7 @@ import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.rest.ProductApi;
 import com.rubinho.lab1.services.ConverterService;
+import com.rubinho.lab1.services.ImportAuditService;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -30,14 +33,17 @@ public class ProductApiImpl implements ProductApi {
     private final ProductService productService;
     private final ConverterService converterService;
     private final UserService userService;
+    private final ImportAuditService importAuditService;
 
     @Autowired
     public ProductApiImpl(ProductService productService,
                           UserService userService,
-                          ConverterService converterService) {
+                          ConverterService converterService,
+                          ImportAuditService importAuditService) {
         this.productService = productService;
         this.userService = userService;
         this.converterService = converterService;
+        this.importAuditService = importAuditService;
     }
 
     @Override
@@ -62,9 +68,21 @@ public class ProductApiImpl implements ProductApi {
             final User user = userService.getUserByToken(getToken(token));
             final String content = new String(file.getBytes());
             final List<ProductDto> productsDto = converterService.toList(content);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(productService.createProducts(productsDto, user));
+            try {
+                final List<ProductDto> created = productService.createProducts(productsDto, user);
+                importAuditService.addImportAudit(
+                        new ImportAudit(null, true, created.size(), user)
+                );
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(created);
+            } catch (Exception e) {
+                importAuditService.addImportAudit(
+                        new ImportAudit(null, false, 0, user)
+                );
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
+            }
+
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();
         }
