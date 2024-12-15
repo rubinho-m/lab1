@@ -112,13 +112,20 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean commit(UUID tid) {
-        transactionManager.commit(transactionMap.get(tid));
-        return true;
+        try {
+            transactionManager.commit(transactionMap.get(tid));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
     public void rollback(UUID tid) {
-        transactionManager.rollback(transactionMap.get(tid));
+        final TransactionStatus transactionStatus = transactionMap.get(tid);
+        if (!transactionStatus.isCompleted()) {
+            transactionManager.rollback(transactionMap.get(tid));
+        }
     }
 
     @Override

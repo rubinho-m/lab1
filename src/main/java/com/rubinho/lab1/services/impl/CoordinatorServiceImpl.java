@@ -67,7 +67,11 @@ public class CoordinatorServiceImpl implements CoordinatorService {
     }
 
     private boolean callCommit(UUID tid) {
-        return productService.commit(tid) && s3Service.commit(tid);
+        final boolean isS3Commited = s3Service.commit(tid);
+        if (!isS3Commited){
+            return false;
+        }
+        return productService.commit(tid);
     }
 
     private void callRollback(UUID tid) {

@@ -8,7 +8,6 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
-import lombok.Locked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -19,21 +18,25 @@ import java.io.InputStream;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class S3ServiceImpl implements S3Service {
     private final MinioClient minioClient;
     private final ConcurrentMap<UUID, MultipartFile> fileMap = new ConcurrentHashMap<>();
+    private final Lock lock = new ReentrantLock();
     private final static String BUCKET = "test";
+
     @Autowired
     public S3ServiceImpl(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
     @Override
-    @Locked
     public PrepareS3Response prepareUpload(UUID tid, MultipartFile file, boolean exception) {
         fileMap.put(tid, file);
+        lock.lock();
         try {
             if (exception) {
                 throw new RuntimeException();
@@ -49,7 +52,6 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
-    @Locked
     public boolean commit(UUID tid) {
         final MultipartFile file = fileMap.get(tid);
         final String objName = file.getOriginalFilename();
@@ -62,16 +64,19 @@ public class S3ServiceImpl implements S3Service {
             return true;
         } catch (Exception e) {
             return false;
+        } finally {
+            lock.unlock();
         }
     }
 
     @Override
-    @Locked
     public void rollback(UUID tid) {
         try {
             final String objName = fileMap.get(tid).getOriginalFilename();
             minioClient.removeObject(RemoveObjectArgs.builder().bucket(BUCKET).object(objName).build());
         } catch (Exception ignored) {
+        } finally {
+            lock.unlock();
         }
     }
 

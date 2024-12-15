@@ -5,7 +5,6 @@ import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.transactions.PrepareProductResponse;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
 
 import java.util.List;
 import java.util.UUID;
