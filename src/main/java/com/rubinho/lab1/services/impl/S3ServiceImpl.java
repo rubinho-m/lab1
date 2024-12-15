@@ -8,6 +8,7 @@ import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import lombok.Locked;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,13 @@ public class S3ServiceImpl implements S3Service {
     private final MinioClient minioClient;
     private final ConcurrentMap<UUID, MultipartFile> fileMap = new ConcurrentHashMap<>();
     private final static String BUCKET = "test";
-
     @Autowired
     public S3ServiceImpl(MinioClient minioClient) {
         this.minioClient = minioClient;
     }
 
     @Override
+    @Locked
     public PrepareS3Response prepareUpload(UUID tid, MultipartFile file, boolean exception) {
         fileMap.put(tid, file);
         try {
@@ -48,6 +49,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    @Locked
     public boolean commit(UUID tid) {
         final MultipartFile file = fileMap.get(tid);
         final String objName = file.getOriginalFilename();
@@ -64,6 +66,7 @@ public class S3ServiceImpl implements S3Service {
     }
 
     @Override
+    @Locked
     public void rollback(UUID tid) {
         try {
             final String objName = fileMap.get(tid).getOriginalFilename();
