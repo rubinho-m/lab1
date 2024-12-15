@@ -36,4 +36,7 @@ public class ImportAudit {
     @JoinColumn
     @ManyToOne
     private User user;
+
+    @Column
+    private String fileName;
 }

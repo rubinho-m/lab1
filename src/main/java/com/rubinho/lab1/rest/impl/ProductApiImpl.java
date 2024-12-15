@@ -10,9 +10,12 @@ import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.rest.ProductApi;
 import com.rubinho.lab1.services.ConverterService;
+import com.rubinho.lab1.services.CoordinatorService;
 import com.rubinho.lab1.services.ImportAuditService;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.UserService;
+import com.rubinho.lab1.transactions.TestingExceptions;
+import com.rubinho.lab1.transactions.TransactionData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,16 +37,19 @@ public class ProductApiImpl implements ProductApi {
     private final ConverterService converterService;
     private final UserService userService;
     private final ImportAuditService importAuditService;
+    private final CoordinatorService coordinatorService;
 
     @Autowired
     public ProductApiImpl(ProductService productService,
                           UserService userService,
                           ConverterService converterService,
-                          ImportAuditService importAuditService) {
+                          ImportAuditService importAuditService,
+                          CoordinatorService coordinatorService) {
         this.productService = productService;
         this.userService = userService;
         this.converterService = converterService;
         this.importAuditService = importAuditService;
+        this.coordinatorService = coordinatorService;
     }
 
     @Override
@@ -55,32 +61,33 @@ public class ProductApiImpl implements ProductApi {
     }
 
     @Override
-    public ResponseEntity<List<ProductDto>> createProducts(List<ProductDto> productsDto, String token) {
-        final User user = userService.getUserByToken(getToken(token));
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(productService.createProducts(productsDto, user));
-    }
-
-    @Override
-    public ResponseEntity<List<ProductDto>> createProductsFromFile(MultipartFile file, String token) {
+    public ResponseEntity<List<ProductDto>> createProductsFromFile(MultipartFile file,
+                                                                   boolean dbException,
+                                                                   boolean s3Exception,
+                                                                   boolean runtimeException,
+                                                                   String token) {
         try {
             final User user = userService.getUserByToken(getToken(token));
             final String content = new String(file.getBytes());
             final List<ProductDto> productsDto = converterService.toList(content);
             try {
-                final List<ProductDto> created = productService.createProducts(productsDto, user);
+                final List<ProductDto> created = coordinatorService.twoPhaseCommit(new TransactionData(
+                        productsDto,
+                        file,
+                        user,
+                        new TestingExceptions(dbException, s3Exception, runtimeException)
+                ));
                 importAuditService.addImportAudit(
-                        new ImportAudit(null, true, created.size(), user)
+                        new ImportAudit(null, true, created.size(), user, file.getOriginalFilename())
                 );
                 return ResponseEntity
                         .status(HttpStatus.CREATED)
                         .body(created);
             } catch (Exception e) {
                 importAuditService.addImportAudit(
-                        new ImportAudit(null, false, 0, user)
+                        new ImportAudit(null, false, 0, user, file.getOriginalFilename())
                 );
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ошибка импорта");
             }
 
         } catch (IOException e) {

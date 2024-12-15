@@ -13,6 +13,7 @@ import com.rubinho.lab1.repository.ProductFilter;
 import com.rubinho.lab1.repository.ProductRepository;
 import com.rubinho.lab1.services.ProductService;
 import com.rubinho.lab1.services.ProductSpecificationService;
+import com.rubinho.lab1.transactions.PrepareProductResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -20,12 +21,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -34,18 +42,22 @@ public class ProductServiceImpl implements ProductService {
     private final OrganizationRepository organizationRepository;
     private final ProductMapper productMapper;
     private final ProductSpecificationService productSpecificationService;
+    private final PlatformTransactionManager transactionManager;
+    private final ConcurrentMap<UUID, TransactionStatus> transactionMap = new ConcurrentHashMap<>();
 
     @Autowired
     public ProductServiceImpl(ProductRepository productRepository,
                               CoordinatesRepository coordinatesRepository,
                               OrganizationRepository organizationRepository,
                               ProductMapper productMapper,
-                              ProductSpecificationService productSpecificationService) {
+                              ProductSpecificationService productSpecificationService,
+                              PlatformTransactionManager transactionManager) {
         this.productRepository = productRepository;
         this.productMapper = productMapper;
         this.productSpecificationService = productSpecificationService;
         this.coordinatesRepository = coordinatesRepository;
         this.organizationRepository = organizationRepository;
+        this.transactionManager = transactionManager;
     }
 
     @Override
@@ -67,10 +79,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
-    public List<ProductDto> createProducts(List<ProductDto> productsDto, User user) {
+    public PrepareProductResponse prepareCreateProducts(UUID tid,
+                                                        List<ProductDto> productsDto,
+                                                        User user,
+                                                        boolean exception) {
+        final DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+        transactionDefinition.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+        final TransactionStatus transactionStatus = transactionManager.getTransaction(transactionDefinition);
+        transactionMap.put(tid, transactionStatus);
         final List<Product> products = new ArrayList<>();
         try {
+            if (exception) {
+                throw new RuntimeException();
+            }
             for (ProductDto productDto : productsDto) {
                 final Product product = productMapper.toEntity(productDto);
                 product.setUser(user);
@@ -79,14 +100,25 @@ public class ProductServiceImpl implements ProductService {
                     throw new IllegalStateException();
                 }
                 products.add(productRepository.save(product));
-
             }
-            return products.stream()
+            final List<ProductDto> createdProducts = products.stream()
                     .map(productMapper::toDto)
                     .toList();
+            return new PrepareProductResponse(true, transactionStatus, createdProducts);
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Один из продуктов плохой");
+            return new PrepareProductResponse(false, transactionStatus, Collections.emptyList());
         }
+    }
+
+    @Override
+    public boolean commit(UUID tid) {
+        transactionManager.commit(transactionMap.get(tid));
+        return true;
+    }
+
+    @Override
+    public void rollback(UUID tid) {
+        transactionManager.rollback(transactionMap.get(tid));
     }
 
     @Override

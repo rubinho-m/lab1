@@ -12,4 +12,5 @@ public class ImportAuditDto {
     private Boolean status;
     private UserDto user;
     private Integer count;
+    private String fileName;
 }

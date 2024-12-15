@@ -3,14 +3,21 @@ package com.rubinho.lab1.services;
 import com.rubinho.lab1.dto.ProductDto;
 import com.rubinho.lab1.model.User;
 import com.rubinho.lab1.repository.ProductFilter;
+import com.rubinho.lab1.transactions.PrepareProductResponse;
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.TransactionStatus;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ProductService {
     ProductDto createProduct(ProductDto productDto, User user);
 
-    List<ProductDto> createProducts(List<ProductDto> productsDto, User user);
+    PrepareProductResponse prepareCreateProducts(UUID tid, List<ProductDto> productsDto, User user, boolean exception);
+
+    boolean commit(UUID tid);
+
+    void rollback(UUID tid);
 
     ProductDto getProductById(long id);
 
