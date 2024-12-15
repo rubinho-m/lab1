@@ -104,9 +104,9 @@ public class ProductServiceImpl implements ProductService {
             final List<ProductDto> createdProducts = products.stream()
                     .map(productMapper::toDto)
                     .toList();
-            return new PrepareProductResponse(true, transactionStatus, createdProducts);
+            return new PrepareProductResponse(true, createdProducts);
         } catch (Exception e) {
-            return new PrepareProductResponse(false, transactionStatus, Collections.emptyList());
+            return new PrepareProductResponse(false, Collections.emptyList());
         }
     }
 
